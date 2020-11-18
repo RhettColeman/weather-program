@@ -1,0 +1,29 @@
+Pseudocode
+1.	#Connect website to python file using request library.
+Import request library
+
+2.	#Confirm connection to openweathermap.org.
+If connection established print “Connected to openweathermap.org”
+If connection fails print “Could not connect to openweathermap.org” and terminate
+
+3.	#Asks the user for a zip code or city.
+AREA = INPUT 'To know the weather, please type in the city or zip code:'
+
+4.	#Validate whether the user entered valid data.
+If user input is valid continue
+If user input is invalid print “Please input a valid zip code or city.” and return to step 3
+
+5.	#Obtain weather data.
+CLOUD_CONDITIONS = Cloud data
+RAIN_CHANCE = Rain data
+TEMPERATURE = Temperature
+
+6.	#Display the weather forecast in a readable format.
+Print “Today’s weather will be <CLOUD_CONDITIONS> with a <RAIN_CHANCE>% chance of rain. It is currently <TEMPERATURE> degrees.”
+
+7.	#Ask user if they would like to look up the weather again.
+Print “Would you like to look up the weather again?”
+If yes continue
+If no terminate program
+
+8.	#Loopback to step 3.
