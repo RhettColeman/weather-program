@@ -1,3 +1,7 @@
+This program requires packages to be installed using these instructions.
+1. In your command terminal go to the project file.
+2. enter the following: pip install -r requirements.txt
+
 Package      Version
 ------------ ---------
 certifi      2020.6.20
