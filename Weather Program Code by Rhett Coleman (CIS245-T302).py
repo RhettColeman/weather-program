@@ -1,4 +1,4 @@
-# Rhett Coleman / CIS245-T302 / 10/30/2020
+# Rhett Coleman / CIS245-T302 / 11/19/2020
 
 import requests
 import time
@@ -11,7 +11,7 @@ def get_api_key():
     config.read('config.ini')
     return config['openweathermap']['api']
 
-# Confirm online connection on first loop
+# Confirm online connection only on the first loop
 def first_run(first_run = []):
     if first_run == []:
         confirm_connection(get_api_key())
@@ -29,16 +29,89 @@ def confirm_connection(api_key):
     except:
         sys.exit('Could not connect to openweathermap.org\nPlease try again later\n')
 
-# Obtain data
+# Obtain raw weather data
 def get_weather_results(user_input,api_key):
+    #If zip code input
     if user_input.isnumeric():
         api_url = f'http://api.openweathermap.org/data/2.5/weather?zip={user_input}&units=imperial&appid={api_key}'
         r = requests.get(api_url)
         return r.json()
+    #If city name input
     else:
         api_url = f'http://api.openweathermap.org/data/2.5/weather?q={user_input}&units=imperial&appid={api_key}'
         r = requests.get(api_url)
         return r.json()
+
+#Translate raw weather data
+def translate_weather(data):
+    #Uses group ID to call the current weather and returns it.
+    main_condition = data['weather'][0]['id']
+    #main_condition = 605 #Use this to test outputs
+
+    # translate clouds
+    cloud_dict = {'with clear skys': 800,
+                  'with very few clouds': 801,
+                  'and partly cloudly': 802,
+                  'and mostly cloudy': 803,
+                  'and overcast': 804}
+
+    def get_cloud(val):
+        for key, value in cloud_dict.items():
+            if val == value:
+                return key
+
+    cloud_conditon = get_cloud(main_condition)
+
+    #Thunderstorm
+    thunderstorm_ids = []
+    thunderstorm_ids.extend(range(200, 299))
+
+    #Raining
+    raining_ids = []
+    raining_ids.extend(range(300, 599))
+
+    #snowing
+    snowing_ids = []
+    snowing_ids.extend(range(600, 699))
+
+    #extreme
+    extreme_ids = []
+    extreme_ids.extend(range(700, 799))
+
+    #Determind MAIN output
+    if cloud_conditon != None:
+        return f'{cloud_conditon}'
+
+    elif main_condition in thunderstorm_ids:
+        return 'and thunder storming'
+
+    elif main_condition in raining_ids:
+        return 'and raining'
+
+    elif main_condition in snowing_ids:
+        return 'and snowing'
+
+    elif main_condition in extreme_ids:
+        return 'and an extreme weather advisory as been issued'
+
+    else:
+        return 'with unreported weather'
+
+#Translate Wind
+def wind_translation(data):
+    # Uses wind speed to call wind condition according to the Beaufort Scale.
+    wind_speed = data['wind']['speed']
+    #wind_speed = 1 #Use this to test outputs
+
+    #Determind wind output
+    if wind_speed < 1.5:
+        return 'calm'
+
+    elif 1.5 <= wind_speed < 14:
+        return 'breezy'
+
+    else:
+        return 'windy'
 
 # validate input
 def validate_input(data):
@@ -51,14 +124,16 @@ def validate_input(data):
 #output
 def weather_output(data):
     city = data['name']
-    cloud_conditions = data['weather'][0]['description']
+    main = translate_weather(data)
     temps = data['main']['temp']
+    winds = wind_translation(data)
     humidity = data['main']['humidity']
     feels = data['main']['feels_like']
-    print(f'The current weather in {city} contains {cloud_conditions}.'
-          f'\nIt is currently {temps} degrees. With {humidity}% humidity, it feels like {feels} degrees.')
 
-#Use Again
+    print(f'\nIn {city}, It is currently {winds}, at {temps}°F degrees {main}.'
+          f'\nWith {humidity}% humidity, it feels like {feels} degrees.')
+
+#Ask user to use again
 def again_input():
     again = input('\nWould you like to check the weather again? (yes or no): ')
     again = again.lower()
@@ -72,7 +147,6 @@ def again_input():
         print('Thank you, enjoy the weather!')
         again = False
         return again
-
 
 #main function
 if __name__ == '__main__':
@@ -90,7 +164,7 @@ if __name__ == '__main__':
         #validate and output
         validate_input(data)
 
-        #Use Again
+        #Ask user to use again
         again = again_input()
 
 
